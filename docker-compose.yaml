@@ -1,6 +1,6 @@
 services:
 
-  tg_log_controller_app:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
