@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Message;
+use App\Models\User;
 
 use App\Http\Requests\StoreMessageRequest;
 use App\Http\Requests\IndexMessageRequest;
@@ -18,6 +19,7 @@ class MessageController extends Controller
         $perPage = $request->input('per_page', 20);
 
         $messages = Message::query()
+            ->with('user')
             ->orderBy('created_at', 'desc')
             ->paginate(
                 perPage: $perPage,
@@ -27,12 +29,20 @@ class MessageController extends Controller
     }
 
     public function show(Message $message): MessageResource {
+        $message->load('user');
         return new MessageResource($message);
     }
 
     public function store(StoreMessageRequest $request) {
 
-        $message = Message::create($request->validated());
+        $user = User::findOrFail($request->validated('user_id'));
+
+        $message = $user->messages()->create([
+            'text' => $request->validated('text'),
+            'type' => $request->validated('type')
+        ]);
+
+        $message->load('user');
 
         return (new MessageResource($message))
             ->response()

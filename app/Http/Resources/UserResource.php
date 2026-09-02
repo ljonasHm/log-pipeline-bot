@@ -5,9 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-use App\Http\Resources\UserResource;
-
-class MessageResource extends JsonResource
+class UserResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -18,11 +16,8 @@ class MessageResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'text' => $this->text,
-            'type' => $this->type,
-            'created_at' => $this->created_at,
-
-            'user' => new UserResource($this->whenLoaded('user'))
+            'name' => $this->name,
+            'telegram_id' => $this->telegram_id
         ];
     }
 }

@@ -37,6 +37,7 @@ class StoreMessageRequest extends FormRequest
         return [
             'text' => ['required', 'string'],
             'type' => ['required', 'string', 'max:50'],
+            'user_id' => ['required', 'integer', 'exists:users,id']
         ];
     }
 }
