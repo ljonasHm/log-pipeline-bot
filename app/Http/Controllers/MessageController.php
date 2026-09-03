@@ -18,12 +18,42 @@ class MessageController extends Controller
     {
         $perPage = $request->input('per_page', 20);
 
-        $messages = Message::query()
-            ->with('user')
-            ->orderBy('created_at', 'desc')
-            ->paginate(
-                perPage: $perPage,
-            );
+        $query = Message::query()
+            ->with('user');
+
+        $query->orderBy(
+            $request->validated('sort', 'created_at'),
+            $request->validated('direction', 'desc')
+        );
+
+        $query->when(
+            $request->validated('type'),
+            function ($query) use ($request) {
+                $query->where('type', $request->validated('type'));
+            }
+        );
+
+        $query->when(
+            $request->validated('user_id'),
+            function ($query) use ($request) {
+                $query->where('user_id', $request->validated('user_id'));
+            }
+        );
+
+        $query->when(
+            $request->validated('search'),
+            function ($query) use ($request) {
+                $query->where(
+                    'text',
+                    'like',
+                    "%{$request->validated('search')}%"
+                );
+            }
+        );
+
+        $messages = $query->paginate(
+            $request->validated('per_page', 20)
+        );
 
         return MessageResource::collection($messages);
     }
