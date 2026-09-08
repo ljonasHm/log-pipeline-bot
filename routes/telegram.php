@@ -16,28 +16,7 @@ use App\Models\TelegramUser;
 |
 */
 
-$bot->onCommand('start', function (Nutgram $bot) {
-    $telegramUser = $bot->user();
-    $chat = $bot->chat();
-
-    \Log::debug(json_encode($telegramUser, JSON_PRETTY_PRINT));
-    \Log::debug(json_encode($chat, JSON_PRETTY_PRINT));
-
-    $user = TelegramUser::firstOrCreate(
-        
-        [
-            'telegram_id' => $telegramUser->id
-        ],
-        [
-            'chat_id' => $chat->id,
-            'name' => $telegramUser->username
-        ]
-    );
-
-    $bot->sendMessage(
-        $user->name
-    );
-})->description('The start command!');
+$bot->onCommand('start', StartCommand::class);
 
 $bot->onCallbackQueryData('hello', function (Nutgram $bot) {
     $bot->answerCallbackQuery();
