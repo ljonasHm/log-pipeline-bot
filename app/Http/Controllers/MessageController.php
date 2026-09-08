@@ -8,8 +8,9 @@ use App\Models\User;
 use App\Http\Requests\StoreMessageRequest;
 use App\Http\Requests\IndexMessageRequest;
 use App\Http\Requests\UpdateMessageRequest;
-
 use App\Http\Resources\MessageResource;
+
+use App\Events\MessageCreated;
 
 
 class MessageController extends Controller
@@ -51,6 +52,8 @@ class MessageController extends Controller
         ]);
 
         $message->load('user');
+
+        event(new MessageCreated($message));
 
         return (new MessageResource($message))
             ->response()
