@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     env_file:  
-    - .env
+      - .env
     container_name: tg_log_controller
     restart: unless-stopped
     working_dir: /var/www
@@ -17,6 +17,22 @@ services:
     networks:
       - tg_log_controller
 
+#add heathcheck
+
+  queue-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:  
+      - .env
+    command: php artisan queue:work --tries=3
+    restart: unless-stopped
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - redis
+    networks:
+    - tg_log_controller
   # nginx:
   #   image: nginx:alpine
   #   container_name: laravel_nginx
@@ -39,8 +55,6 @@ services:
       POSTGRES_DB: ${DB_DATABASE}
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "5433:${DB_PORT}"
     volumes:
       - tg_log_postgres_data:/var/lib/postgresql/data
     networks:
