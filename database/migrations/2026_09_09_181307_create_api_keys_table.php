@@ -11,13 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('messages', function (Blueprint $table) {
+        Schema::create('api_keys', function (Blueprint $table) {
             $table->id();
-            $table->string('type', 50);
-            $table->text('text');
+            
             $table->foreignId('server_id')
                 ->constrained()
                 ->cascadeOnDelete();
+            $table->string('name');
+            $table->string('identifier')->unique();
+            $table->string('key_hash');
+
+            $table->boolean('active')->default(true);
+            $table->timestamp('last_used_at')->nullable();
             $table->timestamps();
         });
     }
@@ -27,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('messages');
+        Schema::dropIfExists('api_keys');
     }
 };

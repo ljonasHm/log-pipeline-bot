@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('messages', function (Blueprint $table) {
-            $table->foreignId('user_id')
-                ->constrained()
-                ->cascadeOnDelete();
+        Schema::create('servers', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->timestamps();
         });
     }
 
@@ -23,8 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('messages', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('user_id');
-        });
+        Schema::dropIfExists('servers');
     }
 };

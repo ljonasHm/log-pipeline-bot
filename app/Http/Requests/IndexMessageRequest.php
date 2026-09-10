@@ -27,7 +27,7 @@ class IndexMessageRequest extends FormRequest
             'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
             'page' => ['sometimes', 'integer', 'min:1'],
             'type' => ['sometimes', 'string', 'max:50'],
-            'user_id' => ['sometimes', 'integer', 'exists:users,id'],
+            'server_id' => ['sometimes', 'integer', 'exists:server,id'],
             'search' => ['sometimes', 'string', 'max:255'],
 
             'sort' => [

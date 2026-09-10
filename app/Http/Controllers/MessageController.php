@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Message;
-use App\Models\User;
+use App\Models\Server;
 
 use App\Http\Requests\StoreMessageRequest;
 use App\Http\Requests\IndexMessageRequest;
@@ -20,13 +20,13 @@ class MessageController extends Controller
         $perPage = $request->input('per_page', 20);
 
         $query = Message::query()
-            ->with('user')
+            ->with('server')
             ->orderBy(
                 $request->validated('sort', 'created_at'),
                 $request->validated('direction', 'desc')
             )
             ->ofType($request->validated('type'))
-            ->forUser($request->validated('user_id'))
+            ->forServer($request->validated('server_id'))
             ->search($request->validated('search'))
             ->orderByDesc('created_at');
 
@@ -38,20 +38,20 @@ class MessageController extends Controller
     }
 
     public function show(Message $message): MessageResource {
-        $message->load('user');
+        $message->load('server');
         return new MessageResource($message);
     }
 
     public function store(StoreMessageRequest $request) {
 
-        $user = User::findOrFail($request->validated('user_id'));
+        $server = Server::findOrFail($request->validated('server_id'));
 
-        $message = $user->messages()->create([
+        $message = $server->messages()->create([
             'text' => $request->validated('text'),
             'type' => $request->validated('type')
         ]);
 
-        $message->load('user');
+        $message->load('server');
 
         event(new MessageCreated($message));
 
