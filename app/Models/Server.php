@@ -10,6 +10,11 @@ use App\Models\Message;
 
 class Server extends Model
 {
+
+    protected $fillable = [
+        'name'
+    ];
+
     public function apiKeys(): HasMany
     {
         return $this->hasMany(ApiKey::class);

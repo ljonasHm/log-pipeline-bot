@@ -44,7 +44,8 @@ class MessageController extends Controller
 
     public function store(StoreMessageRequest $request) {
 
-        $server = Server::findOrFail($request->validated('server_id'));
+        /** @var Server $server */
+        $server = $request->attributes->get('server');
 
         $message = $server->messages()->create([
             'text' => $request->validated('text'),
