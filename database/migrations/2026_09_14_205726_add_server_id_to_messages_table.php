@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('messages', function (Blueprint $table) {
-            $table->id();
-            $table->string('type', 50);
-            $table->text('text');
-            $table->timestamps();
+        Schema::table('messages', function (Blueprint $table) {
+            $table->foreignId('server_id')
+                ->constrained()
+                ->cascadeOnDelete();
         });
     }
 
@@ -24,6 +23,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('messages');
+        Schema::table('messages', function (Blueprint $table) {
+            $table->dropForeign(['server_id']);
+            $table->dropColumn('server_id');
+        });
     }
 };
