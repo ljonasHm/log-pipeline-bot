@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Builder;
 
+use App\Models\Server;
+
 class Message extends Model
 {
     protected $fillable = [
@@ -13,9 +15,9 @@ class Message extends Model
         'type'
     ];
 
-    public function user(): BelongsTo
+    public function server(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Server::class);
     }
 
     public function scopeOfType(Builder $query, ?string $type): void {
@@ -24,9 +26,9 @@ class Message extends Model
         }
     }
 
-    public function scopeForUser(Builder $quert, ?int $userId): void {
-        if ($userId !== null) {
-            $query->where('user_id', $userId);
+    public function scopeForServer(Builder $query, ?int $serverId): void {
+        if ($serverId !== null) {
+            $query->where('server_id', $serverId);
         }
     }
 
