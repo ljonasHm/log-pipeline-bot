@@ -9,7 +9,6 @@ use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 
 use App\Models\TelegramUser;
-use App\Enums\UserRole;
 
 class ChangeUserRoleConversation extends Conversation
 {
