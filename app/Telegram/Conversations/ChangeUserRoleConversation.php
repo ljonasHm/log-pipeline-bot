@@ -12,20 +12,34 @@ use App\Models\TelegramUser;
 
 class ChangeUserRoleConversation extends Conversation
 {
-    protected ?string $step = 'askTelegramId';
+    public ?int $targetTelegramId = null;
 
-    public ?int $telegramId = null;
-
-    public function askTelegramId(Nutgram $bot): void 
+    public function start(Nutgram $bot): void 
     {
+        $telegramId = $bot->user()->id;
+
+        $user = TelegramUser::query()
+            ->where('telegram_id', $telegramId)
+            ->first();
+
+        if (!$user || $user->role !== UserRole::ADMIN) {
+            $bot->sendMessage(
+                'No rules.'
+            );
+
+            $this->end();
+
+            return;
+        }
+
         $bot->sendMessage(
             'Enter the user`s Telegram ID'
         );
 
-        $this->next('askRole');
+        $this->next('askTelegramId');
     }
 
-    public function askRole(Nutgram $bot): void 
+    public function askTelegramId(Nutgram $bot): void 
     {
         $telegramId = $bot->message()?->text;
 
@@ -49,11 +63,11 @@ class ChangeUserRoleConversation extends Conversation
             return;
         }
 
-        $this->telegramId = (int) $telegramId;
+        $this->targetTelegramId = (int) $telegramId;
 
         $bot->sendMessage(
             text: "User:  {$user->name}\n"
-                . "Telegram ID: {$user->telegramId}\n"
+                . "Telegram ID: {$user->telegram_id}\n"
                 . "Select a new role",
             reply_markup: InlineKeyboardMarkup::make()
                 ->addRow(
@@ -83,9 +97,7 @@ class ChangeUserRoleConversation extends Conversation
             return;
         }
 
-        $callbackData = $bot->callbackQuery()->data;
-
-        $role = match ($callbackData) {
+        $role = match ($bot->callbackQuery()->data) {
             'role:admin' => UserRole::ADMIN,
             'role:receiver' => UserRole::RECEIVER,
             'role:none' => UserRole::NONE,
@@ -97,12 +109,13 @@ class ChangeUserRoleConversation extends Conversation
         }
 
         $user = TelegramUser::query()
-            ->where('telegram_id', $this->telegramId)
+            ->where('telegram_id', $this->targetTelegramId)
             ->first();
 
         if (!$user) {
             $bot->answerCallbackQuery(
                 text: 'User not found.',
+                show_alert: true
             );
 
             $this->end();
@@ -110,12 +123,11 @@ class ChangeUserRoleConversation extends Conversation
             return;
         }
 
-        $user->update([
-            'role' => $role,
-        ]);
+        $user->role = $role;
+        $user->save();
 
         $bot->answerCallbackQuery(
-            text: 'Role changes.',
+            text: 'Role changed.',
         );
 
         $bot->sendMessage(

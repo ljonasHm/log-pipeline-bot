@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\UserRole;
 
 class TelegramUser extends Model
 {
@@ -11,4 +12,11 @@ class TelegramUser extends Model
         'chat_id',
         'telegram_id'
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'role' => UserRole::class
+        ];
+    }
 }
