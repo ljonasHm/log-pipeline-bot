@@ -2,13 +2,10 @@
 /** @var SergiX44\Nutgram\Nutgram $bot */
 
 use SergiX44\Nutgram\Nutgram;
-use SergiX44\Nutgram\StartConversation;
 
 use App\Telegram\Handlers\StartCommand;
 use App\Telegram\Conversations\ChangeUserRoleConversation;
-
-use App\Models\TelegramUser;
-use App\Enums\UserRole;
+use App\Telegram\Conversations\AddServerConversation;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,6 +22,11 @@ $bot->onCommand('start', StartCommand::class);
 $bot->onCallbackQueryData(
     'change_user_role',
     ChangeUserRoleConversation::class
+);
+
+$bot->onCallbackQueryData(
+    'add_server',
+    AddServerConversation::class
 );
 
 $bot->onCallbackQueryData('hello', function (Nutgram $bot) {

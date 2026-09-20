@@ -1,0 +1,1 @@
+php artisan nutgram:hook:set https://<server_domain>/api/telegram/webhook

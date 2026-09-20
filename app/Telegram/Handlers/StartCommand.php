@@ -29,15 +29,16 @@ class StartCommand
         $keyboard = InlineKeyboardMarkup::make();
 
         if ($user->role === UserRole::ADMIN) {
-            \Log::debug('user is admin');
             $keyboard->addRow(
                 InlineKeyboardButton::make(
                     'Change user role',
                     callback_data: 'change_user_role',
                 ),
+                InlineKeyboardButton::make(
+                    'Add server',
+                    callback_data: 'add_server'
+                )
             );
-        } else {
-            \Log::debug('user isn`t admin');
         }
 
         $bot->sendMessage(
