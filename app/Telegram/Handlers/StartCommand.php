@@ -2,8 +2,11 @@
 
 namespace App\Telegram\Handlers;
 
+use App\Enums\UserRole;
 use App\Services\TelegramUserService;
 use SergiX44\Nutgram\Nutgram;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
 class StartCommand
 {
@@ -22,9 +25,24 @@ class StartCommand
             $telegramUser->first_name,
             $chat->id
         );
+        
+        $keyboard = InlineKeyboardMarkup::make();
+
+        if ($user->role === UserRole::ADMIN) {
+            \Log::debug('user is admin');
+            $keyboard->addRow(
+                InlineKeyboardButton::make(
+                    'Change user role',
+                    callback_data: 'change_user_role',
+                ),
+            );
+        } else {
+            \Log::debug('user isn`t admin');
+        }
 
         $bot->sendMessage(
-            $user->name
+            text: $user->name,
+            reply_markup: $keyboard
         );
     }
 }

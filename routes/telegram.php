@@ -2,11 +2,13 @@
 /** @var SergiX44\Nutgram\Nutgram $bot */
 
 use SergiX44\Nutgram\Nutgram;
-use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
-use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
+use SergiX44\Nutgram\StartConversation;
+
+use App\Telegram\Handlers\StartCommand;
+use App\Telegram\Conversations\ChangeUserRoleConversation;
 
 use App\Models\TelegramUser;
-use App\Telegram\Handlers\StartCommand;
+use App\Enums\UserRole;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +21,11 @@ use App\Telegram\Handlers\StartCommand;
 */
 
 $bot->onCommand('start', StartCommand::class);
+
+$bot->onCallbackQueryData(
+    'change_user_role',
+    ChangeUserRoleConversation::class
+);
 
 $bot->onCallbackQueryData('hello', function (Nutgram $bot) {
     $bot->answerCallbackQuery();
