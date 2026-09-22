@@ -7,18 +7,13 @@ use SergiX44\Nutgram\Nutgram;
 
 use App\Models\TelegramUser;
 use App\Models\Server;
-use App\Enums\UserRole;
 
 class AddServerConversation extends Conversation
 {
     public function start(Nutgram $bot): void {
-        $telegramId = $bot->user()->id;
+        $telegramUser = TelegramUser::findByTelegramId($bot->user()->id);
 
-        $user = TelegramUser::query()
-            ->where('telegram_id', $telegramId)
-            ->first();
-
-        if (!$user || $user->role !== UserRole::ADMIN) {
+        if (!$telegramUser || !$telegramUser->isAdmin()) {
             $bot->sendMessage(
                 'No rules.'
             );
@@ -37,13 +32,9 @@ class AddServerConversation extends Conversation
 
     public function askServerName(Nutgram $bot): void {
 
-        $telegramId = $bot->user()->id;
+        $telegramUser = TelegramUser::findByTelegramId($bot->user()->id);
 
-        $user = TelegramUser::query()
-            ->where('telegram_id', $telegramId)
-            ->first();
-
-        if (!$user || $user->role !== UserRole::ADMIN) {
+        if (!$telegramUser || !$telegramUser->isAdmin()) {
             $bot->sendMessage(
                 'No rules.'
             );
@@ -53,13 +44,13 @@ class AddServerConversation extends Conversation
             return;
         }
 
-        $server_name = $bot->message()?->text;
+        $serverName = $bot->message()?->text;
 
-        $is_server_exists = Server::query()
-            ->where('name', $server_name)
+        $isServerExists = Server::query()
+            ->where('name', $serverName)
             ->exists();
 
-        if ($is_server_exists) {
+        if ($isServerExists) {
             $bot->sendMessage(
                 'Server with this name already exists'
             );
@@ -68,12 +59,12 @@ class AddServerConversation extends Conversation
         }
 
         Server::create([
-            'name' => $server_name
+            'name' => $serverName
         ]);
 
 
         $bot->sendMessage(
-            "Server ${server_name} created." 
+            "Server {$serverName} created." 
         );
 
         $this->end();

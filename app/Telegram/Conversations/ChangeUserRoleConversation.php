@@ -16,13 +16,9 @@ class ChangeUserRoleConversation extends Conversation
 
     public function start(Nutgram $bot): void 
     {
-        $telegramId = $bot->user()->id;
+        $telegramUser = TelegramUser::findByTelegramId($bot->user()->id);
 
-        $user = TelegramUser::query()
-            ->where('telegram_id', $telegramId)
-            ->first();
-
-        if (!$user || $user->role !== UserRole::ADMIN) {
+        if (!$telegramUser || !$telegramUser->isAdmin()) {
             $bot->sendMessage(
                 'No rules.'
             );
@@ -93,11 +89,9 @@ class ChangeUserRoleConversation extends Conversation
 
     public function changeRole(Nutgram $bot): void
     {
-        $telegramUser = TelegramUser::query()
-            ->where('telegram_id', $bot->user()->id)
-            ->first();
+        $telegramUser = TelegramUser::findByTelegramId($bot->user()->id);
 
-        if (!$telegramUser || $telegramUser->role !== UserRole::ADMIN) {
+        if (!$telegramUser || !$telegramUser->isAdmin()) {
             $bot->sendMessage(
                 text: 'No rules.'
             );

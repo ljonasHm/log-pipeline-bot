@@ -19,4 +19,14 @@ class TelegramUser extends Model
             'role' => UserRole::class
         ];
     }
+
+    public static function findByTelegramId(int $telegramId): ?self
+    {
+        return static::where('telegram_id', $telegramId)->first();
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === UserRole::ADMIN;
+    }
 }
