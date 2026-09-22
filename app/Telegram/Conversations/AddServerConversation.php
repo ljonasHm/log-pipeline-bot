@@ -32,7 +32,7 @@ class AddServerConversation extends Conversation
             'Enter the new server name'
         );
 
-        $this->next('askTelegramId');
+        $this->next('askServerName');
     }
 
     public function askServerName(Nutgram $bot): void {
@@ -55,11 +55,11 @@ class AddServerConversation extends Conversation
 
         $server_name = $bot->message()?->text;
 
-        $existed_server = Server::query()
+        $is_server_exists = Server::query()
             ->where('name', $server_name)
-            ->first();
+            ->exists();
 
-        if ($existed_server) {
+        if ($is_server_exists) {
             $bot->sendMessage(
                 'Server with this name already exists'
             );
