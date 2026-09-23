@@ -2,13 +2,11 @@
 /** @var SergiX44\Nutgram\Nutgram $bot */
 
 use SergiX44\Nutgram\Nutgram;
-use SergiX44\Nutgram\StartConversation;
 
 use App\Telegram\Handlers\StartCommand;
 use App\Telegram\Conversations\ChangeUserRoleConversation;
-
-use App\Models\TelegramUser;
-use App\Enums\UserRole;
+use App\Telegram\Conversations\AddServerConversation;
+use App\Telegram\Conversations\AddApiKeyConversation;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,8 +25,12 @@ $bot->onCallbackQueryData(
     ChangeUserRoleConversation::class
 );
 
-$bot->onCallbackQueryData('hello', function (Nutgram $bot) {
-    $bot->answerCallbackQuery();
+$bot->onCallbackQueryData(
+    'add_server',
+    AddServerConversation::class
+);
 
-    $bot->sendMessage('Привет! Рад тебя видеть!');
-});
+$bot->onCallbackQueryData(
+    'add_api_key',
+    AddApiKeyConversation::class
+);
