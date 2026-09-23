@@ -37,6 +37,10 @@ class StartCommand
                 InlineKeyboardButton::make(
                     'Add server',
                     callback_data: 'add_server'
+                ),
+                InlineKeyboardButton::make(
+                    'Add API key',
+                    callback_data: 'add_api_key'
                 )
             );
         }

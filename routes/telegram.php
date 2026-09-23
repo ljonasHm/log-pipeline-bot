@@ -6,6 +6,7 @@ use SergiX44\Nutgram\Nutgram;
 use App\Telegram\Handlers\StartCommand;
 use App\Telegram\Conversations\ChangeUserRoleConversation;
 use App\Telegram\Conversations\AddServerConversation;
+use App\Telegram\Conversations\AddApiKeyConversation;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,8 +30,7 @@ $bot->onCallbackQueryData(
     AddServerConversation::class
 );
 
-$bot->onCallbackQueryData('hello', function (Nutgram $bot) {
-    $bot->answerCallbackQuery();
-
-    $bot->sendMessage('Привет! Рад тебя видеть!');
-});
+$bot->onCallbackQueryData(
+    'add_api_key',
+    AddApiKeyConversation::class
+);
