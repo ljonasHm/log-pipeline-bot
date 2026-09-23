@@ -22,6 +22,6 @@ class ApiKeyService
             'key_hash' => Hash::make($secret)
         ]);
 
-        return "sk_live_{$identifier}_{$secret}";
+        return env('API_KEY_PREFIX', 'sk_live') . "_{$identifier}_{$secret}";
     }
 }

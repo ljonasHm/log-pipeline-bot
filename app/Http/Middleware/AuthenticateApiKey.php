@@ -26,13 +26,13 @@ class AuthenticateApiKey
             ], 401);
         }
 
-        if (!str_starts_with($key, 'sk_live_')) {
+        if (!str_starts_with($key, env('API_KEY_PREFIX', 'sk_live') . '_')) {
             return response()->json([
                 'message' => 'Invalid API key.',
             ], 401);
         }
 
-        $key = substr($key, strlen('sk_live_'));
+        $key = substr($key, strlen(env('API_KEY_PREFIX', 'sk_live') . '_'));
 
         [$identifier, $secret] = array_pad(
             explode('_', $key, 2),
