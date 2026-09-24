@@ -2,12 +2,12 @@
 
 namespace App\Telegram\Conversations;
 
-use App\Enums\UserRole;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 
+use App\Enums\UserRole;
 use App\Models\TelegramUser;
 
 class ChangeUserRoleConversation extends Conversation
@@ -16,17 +16,6 @@ class ChangeUserRoleConversation extends Conversation
 
     public function start(Nutgram $bot): void 
     {
-        $telegramUser = TelegramUser::findByTelegramId($bot->user()->id);
-
-        if (!$telegramUser || !$telegramUser->isAdmin()) {
-            $bot->sendMessage(
-                'No rules.'
-            );
-
-            $this->end();
-
-            return;
-        }
 
         $bot->sendMessage(
             'Enter the user`s Telegram ID'
@@ -35,7 +24,7 @@ class ChangeUserRoleConversation extends Conversation
         $this->next('askTelegramId');
     }
 
-    public function askTelegramId(Nutgram $bot): void 
+    public function askTelegramId(Nutgram $bot): void
     {
         $telegramId = $bot->message()?->text;
 
@@ -89,15 +78,6 @@ class ChangeUserRoleConversation extends Conversation
 
     public function changeRole(Nutgram $bot): void
     {
-        $telegramUser = TelegramUser::findByTelegramId($bot->user()->id);
-
-        if (!$telegramUser || !$telegramUser->isAdmin()) {
-            $bot->sendMessage(
-                text: 'No rules.'
-            );
-
-            return;
-        }
 
         if (!$bot->isCallbackQuery()) {
             return;
