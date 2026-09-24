@@ -7,6 +7,7 @@ use App\Telegram\Handlers\StartCommand;
 use App\Telegram\Conversations\ChangeUserRoleConversation;
 use App\Telegram\Conversations\AddServerConversation;
 use App\Telegram\Conversations\AddApiKeyConversation;
+use App\Telegram\Middleware\AdminMiddleware;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +18,8 @@ use App\Telegram\Conversations\AddApiKeyConversation;
 | handlers are loaded by the NutgramServiceProvider. Enjoy!
 |
 */
+
+$bot->middleware(AdminMiddleware::class);
 
 $bot->onCommand('start', StartCommand::class);
 

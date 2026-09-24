@@ -5,7 +5,6 @@ namespace App\Telegram\Conversations;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
 
-use App\Models\TelegramUser;
 use App\Models\Server;
 use App\Services\ApiKeyService;
 
@@ -14,18 +13,6 @@ class AddApiKeyConversation extends Conversation
     protected ?string $serverName = null;
 
     public function start(Nutgram $bot): void {
-        $telegramUser = TelegramUser::findByTelegramId($bot->user()->id);
-
-        if (!$telegramUser || !$telegramUser->isAdmin()) {
-            $bot->sendMessage(
-                'No rules.'
-            );
-
-            $this->end();
-
-            return;
-        }
-
         $bot->sendMessage(
             'Enter the server name to add a key.'
         );
@@ -60,18 +47,6 @@ class AddApiKeyConversation extends Conversation
     public function askApiKeyName(
             Nutgram $bot,
         ): void {
-        $telegramUser = TelegramUser::findByTelegramId($bot->user()->id);
-
-        if (!$telegramUser || !$telegramUser->isAdmin()) {
-            $bot->sendMessage(
-                'No rules.'
-            );
-
-            $this->end();
-
-            return;
-        }
-
         $apiKeyName = $bot->message()->text;
         $server = Server::query()
             ->where('name', $this->serverName)
