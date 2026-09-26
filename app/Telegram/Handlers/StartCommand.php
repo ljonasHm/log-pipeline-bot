@@ -35,8 +35,8 @@ class StartCommand
                     callback_data: 'change_user_role',
                 ),
                 InlineKeyboardButton::make(
-                    'Add server',
-                    callback_data: 'add_server'
+                    'Servers',
+                    callback_data: 'servers:1'
                 ),
                 InlineKeyboardButton::make(
                     'Add API key',
