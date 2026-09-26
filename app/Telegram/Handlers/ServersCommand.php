@@ -39,10 +39,15 @@ class ServersCommand
 
         $firstItem = $servers->firstItem() ?? 1;
 
-        return collect($servers->items())
+        $list = collect($servers->items())
             ->values()
             ->map(fn (Server $server, int $index) => ($firstItem + $index).'. '.$server->name)
             ->implode("\n");
+
+        $shown = $servers->lastItem() ?? 0;
+        $total = $servers->total();
+
+        return $list."\n\n{$shown}/{$total}";
     }
 
     private function buildKeyboard(LengthAwarePaginator $servers): InlineKeyboardMarkup
