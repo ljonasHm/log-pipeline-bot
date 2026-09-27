@@ -4,6 +4,8 @@
 use SergiX44\Nutgram\Nutgram;
 
 use App\Telegram\Handlers\StartCommand;
+use App\Telegram\Handlers\ServersCommand;
+use App\Telegram\Handlers\ApiKeysCommand;
 use App\Telegram\Conversations\ChangeUserRoleConversation;
 use App\Telegram\Conversations\AddServerConversation;
 use App\Telegram\Conversations\AddApiKeyConversation;
@@ -22,6 +24,16 @@ use App\Telegram\Middleware\AdminMiddleware;
 $bot->middleware(AdminMiddleware::class);
 
 $bot->onCommand('start', StartCommand::class);
+
+$bot->onCallbackQueryData(
+    'servers:{page}',
+    ServersCommand::class
+);
+
+$bot->onCallbackQueryData(
+    'api_keys:{page}',
+    ApiKeysCommand::class
+);
 
 $bot->onCallbackQueryData(
     'change_user_role',
