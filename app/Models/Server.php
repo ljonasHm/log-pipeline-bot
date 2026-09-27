@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
+use Database\Factories\ServerFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-use App\Models\ApiKey;
-use App\Models\Message;
-
 class Server extends Model
 {
+    /** @use HasFactory<ServerFactory> */
+    use HasFactory;
 
     protected $fillable = [
-        'name'
+        'name',
     ];
 
     public function apiKeys(): HasMany
