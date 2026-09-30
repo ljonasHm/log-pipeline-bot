@@ -12,8 +12,7 @@ class StartCommand
 {
     public function __construct(
         private TelegramUserService $telegramUserService,
-    ) {
-    }
+    ) {}
 
     public function __invoke(Nutgram $bot): void
     {
@@ -25,14 +24,14 @@ class StartCommand
             $telegramUser->first_name,
             $chat->id
         );
-        
+
         $keyboard = InlineKeyboardMarkup::make();
 
         if ($user->role === UserRole::ADMIN) {
             $keyboard->addRow(
                 InlineKeyboardButton::make(
-                    'Change user role',
-                    callback_data: 'change_user_role',
+                    'Telegram users',
+                    callback_data: 'telegram_users:1',
                 ),
                 InlineKeyboardButton::make(
                     'Servers',
