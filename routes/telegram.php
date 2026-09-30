@@ -1,15 +1,16 @@
 <?php
-/** @var SergiX44\Nutgram\Nutgram $bot */
 
-use SergiX44\Nutgram\Nutgram;
+/** @var Nutgram $bot */
 
-use App\Telegram\Handlers\StartCommand;
-use App\Telegram\Handlers\ServersCommand;
-use App\Telegram\Handlers\ApiKeysCommand;
-use App\Telegram\Conversations\ChangeUserRoleConversation;
-use App\Telegram\Conversations\AddServerConversation;
 use App\Telegram\Conversations\AddApiKeyConversation;
+use App\Telegram\Conversations\AddServerConversation;
+use App\Telegram\Conversations\ChangeUserRoleConversation;
+use App\Telegram\Handlers\ApiKeysCommand;
+use App\Telegram\Handlers\ServersCommand;
+use App\Telegram\Handlers\StartCommand;
+use App\Telegram\Handlers\TelegramUsersCommand;
 use App\Telegram\Middleware\AdminMiddleware;
+use SergiX44\Nutgram\Nutgram;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +34,11 @@ $bot->onCallbackQueryData(
 $bot->onCallbackQueryData(
     'api_keys:{page}',
     ApiKeysCommand::class
+);
+
+$bot->onCallbackQueryData(
+    'telegram_users:{page}',
+    TelegramUsersCommand::class
 );
 
 $bot->onCallbackQueryData(
