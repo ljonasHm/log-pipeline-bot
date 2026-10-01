@@ -2,16 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Message;
-use App\Models\Server;
-
-use App\Http\Requests\StoreMessageRequest;
+use App\Events\MessageCreated;
 use App\Http\Requests\IndexMessageRequest;
+use App\Http\Requests\StoreMessageRequest;
 use App\Http\Requests\UpdateMessageRequest;
 use App\Http\Resources\MessageResource;
-
-use App\Events\MessageCreated;
-
+use App\Models\Message;
+use App\Models\MessageType;
+use App\Models\Server;
 
 class MessageController extends Controller
 {
@@ -37,19 +35,25 @@ class MessageController extends Controller
         return MessageResource::collection($messages);
     }
 
-    public function show(Message $message): MessageResource {
+    public function show(Message $message): MessageResource
+    {
         $message->load('server');
+
         return new MessageResource($message);
     }
 
-    public function store(StoreMessageRequest $request) {
+    public function store(StoreMessageRequest $request)
+    {
 
         /** @var Server $server */
         $server = $request->attributes->get('server');
 
+        $type = $request->validated('type');
+
         $message = $server->messages()->create([
             'text' => $request->validated('text'),
-            'type' => $request->validated('type')
+            'type' => $type,
+            'message_type_id' => MessageType::query()->withName($type)->value('id'),
         ]);
 
         $message->load('server');
@@ -61,13 +65,15 @@ class MessageController extends Controller
             ->setStatusCode(201);
     }
 
-    public function update(UpdateMessageRequest $request, Message $message): MessageResource {
+    public function update(UpdateMessageRequest $request, Message $message): MessageResource
+    {
         $message->update($request->validated());
 
         return new MessageResource($message);
     }
 
-    public function destroy(Message $message) {
+    public function destroy(Message $message)
+    {
         $message->delete();
 
         return response()->noContent();

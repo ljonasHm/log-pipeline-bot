@@ -81,6 +81,13 @@ class TelegramUsersCommand
             ),
         );
 
+        $keyboard->addRow(
+            InlineKeyboardButton::make(
+                'Add to ignore list',
+                callback_data: 'add_user_ignored_message_type',
+            ),
+        );
+
         return $keyboard;
     }
 }
