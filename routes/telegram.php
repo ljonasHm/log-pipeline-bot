@@ -3,9 +3,11 @@
 /** @var Nutgram $bot */
 
 use App\Telegram\Conversations\AddApiKeyConversation;
+use App\Telegram\Conversations\AddMessageTypeConversation;
 use App\Telegram\Conversations\AddServerConversation;
 use App\Telegram\Conversations\ChangeUserRoleConversation;
 use App\Telegram\Handlers\ApiKeysCommand;
+use App\Telegram\Handlers\MessageTypesCommand;
 use App\Telegram\Handlers\ServersCommand;
 use App\Telegram\Handlers\StartCommand;
 use App\Telegram\Handlers\TelegramUsersCommand;
@@ -42,6 +44,11 @@ $bot->onCallbackQueryData(
 );
 
 $bot->onCallbackQueryData(
+    'message_types:{page}',
+    MessageTypesCommand::class
+);
+
+$bot->onCallbackQueryData(
     'change_user_role',
     ChangeUserRoleConversation::class
 );
@@ -54,4 +61,9 @@ $bot->onCallbackQueryData(
 $bot->onCallbackQueryData(
     'add_api_key',
     AddApiKeyConversation::class
+);
+
+$bot->onCallbackQueryData(
+    'add_message_type',
+    AddMessageTypeConversation::class
 );

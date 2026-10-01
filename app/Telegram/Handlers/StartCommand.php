@@ -37,10 +37,16 @@ class StartCommand
                     'Servers',
                     callback_data: 'servers:1'
                 ),
+            );
+            $keyboard->addRow(
                 InlineKeyboardButton::make(
                     'API keys',
                     callback_data: 'api_keys:1'
-                )
+                ),
+                InlineKeyboardButton::make(
+                    'Message types',
+                    callback_data: 'message_types:1'
+                ),
             );
         }
 

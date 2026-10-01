@@ -27,7 +27,7 @@ class AddMessageTypeConversation extends Conversation
             ->where('name', $newTypeKey)
             ->exists();
 
-        if (!$isTypeExists) {
+        if ($isTypeExists) {
             $bot->sendMessage(
                 'Type with this name already exists.'
             );
