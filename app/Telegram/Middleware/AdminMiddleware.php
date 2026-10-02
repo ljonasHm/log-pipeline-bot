@@ -24,13 +24,22 @@ class AdminMiddleware
             ? TelegramUser::findByTelegramId($telegramId)
             : null;
 
-        if ($telegramUser !== null && $this->isOwnIgnoreList($bot)) {
+
+        if ($telegramUser === null) {
+            $bot->sendMessage(
+                'No rules.'
+            );
+
+            return;
+        }
+
+        if ($this->isOwnIgnoreList($bot) && Gate::forUser($telegramUser)->allows('change-own-ignore')) {
             $next($bot);
 
             return;
         }
 
-        if ($telegramUser === null || Gate::forUser($telegramUser)->denies('admin')) {
+        if (Gate::forUser($telegramUser)->denies('manage')) {
             $bot->sendMessage(
                 'No rules.'
             );

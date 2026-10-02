@@ -50,12 +50,14 @@ class StartCommand
             );
         }
 
-        $keyboard->addRow(
-            InlineKeyboardButton::make(
-                'Ignore list',
-                callback_data: 'add_own_ignored_message_type',
-            ),
-        );
+        if ($user->isAdmin() || $user->isReceiver()) {
+            $keyboard->addRow(
+                InlineKeyboardButton::make(
+                    'Ignore list',
+                    callback_data: 'add_own_ignored_message_type',
+                ),
+            );
+        }
 
         $bot->sendMessage(
             text: $user->name,

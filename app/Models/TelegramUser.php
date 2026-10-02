@@ -37,6 +37,11 @@ class TelegramUser extends Model
         return $this->role === UserRole::ADMIN;
     }
 
+    public function isReceiver(): bool
+    {
+        return $this->role === UserRole::RECEIVER;
+    }
+
     public function ignoredMessageTypes(): BelongsToMany
     {
         return $this->belongsToMany(MessageType::class);
