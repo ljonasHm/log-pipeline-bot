@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use Database\Factories\TelegramUserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class TelegramUser extends Model
 {
@@ -34,5 +35,15 @@ class TelegramUser extends Model
     public function isAdmin(): bool
     {
         return $this->role === UserRole::ADMIN;
+    }
+
+    public function isReceiver(): bool
+    {
+        return $this->role === UserRole::RECEIVER;
+    }
+
+    public function ignoredMessageTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(MessageType::class);
     }
 }

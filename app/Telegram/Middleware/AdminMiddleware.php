@@ -2,11 +2,11 @@
 
 namespace App\Telegram\Middleware;
 
-use SergiX44\Nutgram\Nutgram;
+use App\Models\TelegramUser;
+use App\Telegram\Conversations\AddOwnIgnoredMessageTypeConversation;
 use Illuminate\Support\Facades\Gate;
 use SergiX44\Nutgram\Middleware\Link;
-
-use App\Models\TelegramUser;
+use SergiX44\Nutgram\Nutgram;
 
 class AdminMiddleware
 {
@@ -24,7 +24,22 @@ class AdminMiddleware
             ? TelegramUser::findByTelegramId($telegramId)
             : null;
 
-        if (!$telegramUser || Gate::forUser($telegramUser)->denies('admin')) {
+
+        if ($telegramUser === null) {
+            $bot->sendMessage(
+                'No rules.'
+            );
+
+            return;
+        }
+
+        if ($this->isOwnIgnoreList($bot) && Gate::forUser($telegramUser)->allows('change-own-ignore')) {
+            $next($bot);
+
+            return;
+        }
+
+        if (Gate::forUser($telegramUser)->denies('manage')) {
             $bot->sendMessage(
                 'No rules.'
             );
@@ -33,6 +48,21 @@ class AdminMiddleware
         }
 
         $next($bot);
+    }
+
+    private function isOwnIgnoreList(Nutgram $bot): bool
+    {
+        if ($bot->callbackQuery()?->data === 'add_own_ignored_message_type') {
+            return true;
+        }
+
+        $conversation = $bot->currentConversation(
+            $bot->userId(),
+            $bot->chatId(),
+            $bot->messageThreadId(),
+        );
+
+        return $conversation instanceof AddOwnIgnoredMessageTypeConversation;
     }
 
     private function isStartCommand(Nutgram $bot): bool

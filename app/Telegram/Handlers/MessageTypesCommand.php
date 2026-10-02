@@ -2,13 +2,13 @@
 
 namespace App\Telegram\Handlers;
 
-use App\Models\TelegramUser;
+use App\Models\MessageType;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
-class TelegramUsersCommand
+class MessageTypesCommand
 {
     private const PER_PAGE = 10;
 
@@ -16,12 +16,12 @@ class TelegramUsersCommand
     {
         $page = max(1, (int) $page);
 
-        $users = TelegramUser::query()
+        $messageTypes = MessageType::query()
             ->orderBy('id')
             ->paginate(self::PER_PAGE, page: $page);
 
-        $text = $this->buildText($users);
-        $keyboard = $this->buildKeyboard($users);
+        $text = $this->buildText($messageTypes);
+        $keyboard = $this->buildKeyboard($messageTypes);
 
         $bot->editMessageText(
             text: $text,
@@ -31,42 +31,42 @@ class TelegramUsersCommand
         $bot->answerCallbackQuery();
     }
 
-    private function buildText(LengthAwarePaginator $users): string
+    private function buildText(LengthAwarePaginator $messageTypes): string
     {
-        if ($users->isEmpty()) {
-            return 'No Telegram users.';
+        if ($messageTypes->isEmpty()) {
+            return 'No message types.';
         }
 
-        $firstItem = $users->firstItem() ?? 1;
+        $firstItem = $messageTypes->firstItem() ?? 1;
 
-        $list = collect($users->items())
+        $list = collect($messageTypes->items())
             ->values()
-            ->map(fn (TelegramUser $user, int $index) => ($firstItem + $index).'. '.$user->name.' — '.$user->chat_id)
+            ->map(fn (MessageType $messageType, int $index) => ($firstItem + $index).'. '.$messageType->name.' — '.$messageType->title)
             ->implode("\n");
 
-        $shown = $users->lastItem() ?? 0;
-        $total = $users->total();
+        $shown = $messageTypes->lastItem() ?? 0;
+        $total = $messageTypes->total();
 
         return $list."\n\n{$shown}/{$total}";
     }
 
-    private function buildKeyboard(LengthAwarePaginator $users): InlineKeyboardMarkup
+    private function buildKeyboard(LengthAwarePaginator $messageTypes): InlineKeyboardMarkup
     {
         $keyboard = InlineKeyboardMarkup::make();
-        $page = $users->currentPage();
+        $page = $messageTypes->currentPage();
         $navButtons = [];
 
         if ($page > 1) {
             $navButtons[] = InlineKeyboardButton::make(
                 'Previous',
-                callback_data: 'telegram_users:'.($page - 1),
+                callback_data: 'message_types:'.($page - 1),
             );
         }
 
-        if ($users->hasMorePages()) {
+        if ($messageTypes->hasMorePages()) {
             $navButtons[] = InlineKeyboardButton::make(
                 'Next',
-                callback_data: 'telegram_users:'.($page + 1),
+                callback_data: 'message_types:'.($page + 1),
             );
         }
 
@@ -76,15 +76,8 @@ class TelegramUsersCommand
 
         $keyboard->addRow(
             InlineKeyboardButton::make(
-                'Change user role',
-                callback_data: 'change_user_role',
-            ),
-        );
-
-        $keyboard->addRow(
-            InlineKeyboardButton::make(
-                'Add to ignore list',
-                callback_data: 'add_user_ignored_message_type',
+                'Add message type',
+                callback_data: 'add_message_type',
             ),
         );
 

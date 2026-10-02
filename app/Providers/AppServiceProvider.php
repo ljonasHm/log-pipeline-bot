@@ -22,8 +22,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Gate::define('admin', function (TelegramUser $user): bool {
+        Gate::define('manage', function (TelegramUser $user): bool {
             return $user->isAdmin();
+        });
+
+        Gate::define('change-own-ignore', function (TelegramUser $user): bool {
+            return $user->isAdmin() || $user->isReceiver();
         });
     }
 }

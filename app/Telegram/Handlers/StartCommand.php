@@ -37,10 +37,25 @@ class StartCommand
                     'Servers',
                     callback_data: 'servers:1'
                 ),
+            );
+            $keyboard->addRow(
                 InlineKeyboardButton::make(
                     'API keys',
                     callback_data: 'api_keys:1'
-                )
+                ),
+                InlineKeyboardButton::make(
+                    'Message types',
+                    callback_data: 'message_types:1'
+                ),
+            );
+        }
+
+        if ($user->isAdmin() || $user->isReceiver()) {
+            $keyboard->addRow(
+                InlineKeyboardButton::make(
+                    'Ignore list',
+                    callback_data: 'add_own_ignored_message_type',
+                ),
             );
         }
 

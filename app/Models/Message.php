@@ -17,11 +17,17 @@ class Message extends Model
         'text',
         'type',
         'server_id',
+        'message_type_id',
     ];
 
     public function server(): BelongsTo
     {
         return $this->belongsTo(Server::class);
+    }
+
+    public function messageType(): BelongsTo
+    {
+        return $this->belongsTo(MessageType::class);
     }
 
     public function scopeOfType(Builder $query, ?string $type): void

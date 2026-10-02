@@ -27,7 +27,7 @@ class SendTelegramMessageToUser implements ShouldQueue
     public function handle(TelegramMessageService $telegramMessageService): void
     {
         $user = TelegramUser::query()->find($this->telegramUserId);
-        $message = Message::query()->find($this->messageId);
+        $message = Message::query()->with('messageType')->find($this->messageId);
 
         if ($user === null || $message === null) {
             return;
