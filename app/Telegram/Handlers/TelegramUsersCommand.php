@@ -88,6 +88,13 @@ class TelegramUsersCommand
             ),
         );
 
+        $keyboard->addRow(
+            InlineKeyboardButton::make(
+                'Back',
+                callback_data: 'start',
+            ),
+        );
+
         return $keyboard;
     }
 }

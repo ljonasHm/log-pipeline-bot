@@ -31,6 +31,11 @@ $bot->middleware(AdminMiddleware::class);
 $bot->onCommand('start', StartCommand::class);
 
 $bot->onCallbackQueryData(
+    'start',
+    StartCommand::class
+);
+
+$bot->onCallbackQueryData(
     'servers:{page}',
     ServersCommand::class
 );

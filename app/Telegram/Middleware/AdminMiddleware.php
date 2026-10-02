@@ -67,6 +67,10 @@ class AdminMiddleware
 
     private function isStartCommand(Nutgram $bot): bool
     {
+        if ($bot->callbackQuery()?->data === 'start') {
+            return true;
+        }
+
         return preg_match(
             '/^\/start(?:@\w+)?(?:\s|$)/i',
             $bot->message()?->text ?? ''

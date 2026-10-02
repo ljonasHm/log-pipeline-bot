@@ -59,6 +59,17 @@ class StartCommand
             );
         }
 
+        if ($bot->isCallbackQuery()) {
+            $bot->editMessageText(
+                text: $user->name,
+                reply_markup: $keyboard,
+            );
+
+            $bot->answerCallbackQuery();
+
+            return;
+        }
+
         $bot->sendMessage(
             text: $user->name,
             reply_markup: $keyboard
