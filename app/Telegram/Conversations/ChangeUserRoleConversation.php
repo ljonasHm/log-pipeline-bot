@@ -2,58 +2,52 @@
 
 namespace App\Telegram\Conversations;
 
-use SergiX44\Nutgram\Conversations\Conversation;
-use SergiX44\Nutgram\Nutgram;
-use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
-use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
-
 use App\Enums\UserRole;
 use App\Models\TelegramUser;
+use App\Services\TelegramUserService;
+use Illuminate\Database\Eloquent\Collection;
+use SergiX44\Nutgram\Conversations\Conversation;
+use SergiX44\Nutgram\Nutgram;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
 class ChangeUserRoleConversation extends Conversation
 {
-    public ?int $targetTelegramId = null;
+    public ?int $telegramUserId = null;
 
-    public function start(Nutgram $bot): void 
+    public function start(Nutgram $bot): void
     {
-
         $bot->sendMessage(
-            'Enter the user`s Telegram ID'
+            'Enter the user chat_id or name.'
         );
 
-        $this->next('askTelegramId');
+        $this->next('askUser');
     }
 
-    public function askTelegramId(Nutgram $bot): void
+    public function askUser(Nutgram $bot): void
     {
-        $telegramId = $bot->message()?->text;
+        $input = trim($bot->message()?->text ?? '');
 
-        if (!ctype_digit($telegramId ?? '')) {
+        if ($input === '') {
             $bot->sendMessage(
-                'Telegram ID must consist of numbers only.'
-            );
-            
-            return;
-        }
-
-        $user = TelegramUser::query()
-            ->where('telegram_id', $telegramId)
-            ->first();
-
-        if (!$user) {
-            $bot->sendMessage(
-                'User with this Telegram ID not found'
+                'Enter the user chat_id or name.'
             );
 
             return;
         }
 
-        $this->targetTelegramId = (int) $telegramId;
+        $user = $this->resolveUser($bot, $input);
+
+        if ($user === null) {
+            return;
+        }
+
+        $this->telegramUserId = $user->id;
 
         $bot->sendMessage(
             text: "User:  {$user->name}\n"
-                . "Telegram ID: {$user->telegram_id}\n"
-                . "Select a new role",
+                ."Chat ID: {$user->chat_id}\n"
+                .'Select a new role',
             reply_markup: InlineKeyboardMarkup::make()
                 ->addRow(
                     InlineKeyboardButton::make(
@@ -78,8 +72,7 @@ class ChangeUserRoleConversation extends Conversation
 
     public function changeRole(Nutgram $bot): void
     {
-
-        if (!$bot->isCallbackQuery()) {
+        if (! $bot->isCallbackQuery()) {
             return;
         }
 
@@ -90,15 +83,13 @@ class ChangeUserRoleConversation extends Conversation
             default => null,
         };
 
-        if (!$role) {
+        if (! $role) {
             return;
         }
 
-        $user = TelegramUser::query()
-            ->where('telegram_id', $this->targetTelegramId)
-            ->first();
+        $user = TelegramUser::query()->find($this->telegramUserId);
 
-        if (!$user) {
+        if (! $user) {
             $bot->answerCallbackQuery(
                 text: 'User not found.',
                 show_alert: true
@@ -122,5 +113,30 @@ class ChangeUserRoleConversation extends Conversation
         );
 
         $this->end();
+    }
+
+    private function resolveUser(Nutgram $bot, string $input): ?TelegramUser
+    {
+        $result = $bot->getContainer()
+            ->get(TelegramUserService::class)
+            ->findByChatIdOrName($input);
+
+        if ($result instanceof Collection) {
+            $bot->sendMessage(
+                'Several users have this name. Enter the chat_id.'
+            );
+
+            return null;
+        }
+
+        if ($result === null) {
+            $bot->sendMessage(
+                'User not found.'
+            );
+
+            return null;
+        }
+
+        return $result;
     }
 }

@@ -4,6 +4,7 @@ namespace App\Telegram\Conversations;
 
 use App\Models\MessageType;
 use App\Models\TelegramUser;
+use App\Services\TelegramUserService;
 use Illuminate\Database\Eloquent\Collection;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
@@ -33,7 +34,7 @@ class AddUserIgnoredMessageTypeConversation extends Conversation
             return;
         }
 
-        $user = $this->findUser($bot, $input);
+        $user = $this->resolveUser($bot, $input);
 
         if ($user === null) {
             return;
@@ -93,20 +94,13 @@ class AddUserIgnoredMessageTypeConversation extends Conversation
         $this->end();
     }
 
-    private function findUser(Nutgram $bot, string $input): ?TelegramUser
+    private function resolveUser(Nutgram $bot, string $input): ?TelegramUser
     {
-        if ($this->isChatId($input)) {
-            $user = TelegramUser::query()->where('chat_id', $input)->first();
+        $result = $bot->getContainer()
+            ->get(TelegramUserService::class)
+            ->findByChatIdOrName($input);
 
-            if ($user !== null) {
-                return $user;
-            }
-        }
-
-        /** @var Collection<int, TelegramUser> $users */
-        $users = TelegramUser::query()->where('name', $input)->get();
-
-        if ($users->count() > 1) {
+        if ($result instanceof Collection) {
             $bot->sendMessage(
                 'Several users have this name. Enter the chat_id.'
             );
@@ -114,9 +108,7 @@ class AddUserIgnoredMessageTypeConversation extends Conversation
             return null;
         }
 
-        $user = $users->first();
-
-        if ($user === null) {
+        if ($result === null) {
             $bot->sendMessage(
                 'User not found.'
             );
@@ -124,11 +116,6 @@ class AddUserIgnoredMessageTypeConversation extends Conversation
             return null;
         }
 
-        return $user;
-    }
-
-    private function isChatId(string $input): bool
-    {
-        return preg_match('/^-?\d+$/', $input) === 1;
+        return $result;
     }
 }
