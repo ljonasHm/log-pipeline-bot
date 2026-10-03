@@ -116,8 +116,9 @@ class ChangeUserRoleConversation extends Conversation
             text: 'Role changed.',
         );
 
-        $bot->sendMessage(
-            "User {$user->name} role has been changed to {$role->value}"
+        $bot->editMessageText(
+            text: "User {$user->name} role has been changed to {$role->value}",
+            reply_markup: InlineKeyboardMarkup::make(),
         );
 
         $this->end();
