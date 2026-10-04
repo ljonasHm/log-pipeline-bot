@@ -17,6 +17,14 @@ class TelegramUsersCommand
         $page = max(1, (int) $page);
 
         $users = TelegramUser::query()
+            ->orderByRaw("
+                CASE
+                    WHEN role = 'admin' THEN 1
+                    WHEN role = 'receiver' THEN 2
+                    WHEN role = 'none' THEN 3
+                    ELSE 4
+                END
+            ")
             ->orderBy('id')
             ->paginate(self::PER_PAGE, page: $page);
 
@@ -41,7 +49,7 @@ class TelegramUsersCommand
 
         $list = collect($users->items())
             ->values()
-            ->map(fn (TelegramUser $user, int $index) => ($firstItem + $index).'. '.$user->name.' — '.$user->chat_id)
+            ->map(fn (TelegramUser $user, int $index) => ($firstItem + $index).'. '.$user->name.' — '.$user->role->value.' '.$user->chat_id)
             ->implode("\n");
 
         $shown = $users->lastItem() ?? 0;
@@ -85,6 +93,13 @@ class TelegramUsersCommand
             InlineKeyboardButton::make(
                 'Add to ignore list',
                 callback_data: 'add_user_ignored_message_type',
+            ),
+        );
+
+        $keyboard->addRow(
+            InlineKeyboardButton::make(
+                'Back',
+                callback_data: 'start',
             ),
         );
 

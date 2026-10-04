@@ -59,9 +59,33 @@ class StartCommand
             );
         }
 
+        $text = $this->buildWelcomeText($user->name, $user->role);
+
+        if ($bot->isCallbackQuery()) {
+            $bot->editMessageText(
+                text: $text,
+                reply_markup: $keyboard,
+            );
+
+            $bot->answerCallbackQuery();
+
+            return;
+        }
+
         $bot->sendMessage(
-            text: $user->name,
+            text: $text,
             reply_markup: $keyboard
         );
+    }
+
+    private function buildWelcomeText(string $name, UserRole $role): string
+    {
+        $suffix = match ($role) {
+            UserRole::ADMIN => 'you have permission to receive messages and manage the bot.',
+            UserRole::RECEIVER => 'you have permission to receive messages and edit your own ignore list.',
+            UserRole::NONE => 'you do not have permission to receive messages or manage the bot. Contact the resource administrator to get access.',
+        };
+
+        return "{$name}, {$suffix}";
     }
 }
