@@ -2,46 +2,50 @@
 
 namespace App\Telegram\Handlers;
 
-use App\Models\MessageType;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-class MessageTypesCommand
+use App\Models\TelegramUser;
+use App\Models\MessageType;
+
+class OwnIgnoredMessageTypeCommand
 {
     private const PER_PAGE = 20;
 
-    public function __invoke(Nutgram $bot, string $page = '1'): void
-    {
+    public function __invoke(Nutgram $bot, string $page = '1'): void {
         $page = max(1, (int) $page);
+        $telegramId = $bot->user()?->id;
+        $user = $telegramId !== null 
+            ? TelegramUser::findByTelegramId($telegramId) 
+            : null;
 
-        $messageTypes = MessageType::query()
+        $ignoredMessageTypes = $user->ignoredMessageTypes()
             ->orderBy('id')
             ->paginate(self::PER_PAGE, page: $page);
 
-        $text = $this->buildText($messageTypes);
-        $keyboard = $this->buildKeyboard($messageTypes);
+        $text = $this->buildText($ignoredMessageTypes);
+        $keyboard = $this->buildKeyboard($ignoredMessageTypes);
 
         $bot->editMessageText(
             text: $text,
-            reply_markup: $keyboard,
+            reply_markup: $keyboard
         );
 
         $bot->answerCallbackQuery();
     }
 
-    private function buildText(LengthAwarePaginator $messageTypes): string
-    {
+    private function buildText(LengthAwarePaginator $messageTypes) {
         if ($messageTypes->isEmpty()) {
-            return 'No message types.';
+            return 'No ignored types.';
         }
 
         $firstItem = $messageTypes->firstItem() ?? 1;
 
         $list = collect($messageTypes->items())
             ->values()
-            ->map(fn (MessageType $messageType, int $index) => ($firstItem + $index).'. '.$messageType->name.' — '.$messageType->title)
+            ->map(fn (MessageType $messageType, int $index) => ($firstItem + $index).'. '.$messageType->name)
             ->implode("\n");
 
         $shown = $messageTypes->lastItem() ?? 0;
@@ -50,7 +54,7 @@ class MessageTypesCommand
         return $list."\n\n{$shown}/{$total}";
     }
 
-    private function buildKeyboard(LengthAwarePaginator $messageTypes): InlineKeyboardMarkup
+    private function buildKeyboard(LengthAwarePaginator $messageTypes): InlineKeyboardMarkup 
     {
         $keyboard = InlineKeyboardMarkup::make();
         $page = $messageTypes->currentPage();
@@ -59,14 +63,14 @@ class MessageTypesCommand
         if ($page > 1) {
             $navButtons[] = InlineKeyboardButton::make(
                 'Previous',
-                callback_data: 'message_types:'.($page - 1),
+                callback_data: 'own_ignored_message_type:'.($page - 1),
             );
         }
 
         if ($messageTypes->hasMorePages()) {
             $navButtons[] = InlineKeyboardButton::make(
                 'Next',
-                callback_data: 'message_types:'.($page + 1),
+                callback_data: 'own_ignored_message_type:'.($page + 1),
             );
         }
 
@@ -76,8 +80,8 @@ class MessageTypesCommand
 
         $keyboard->addRow(
             InlineKeyboardButton::make(
-                'Add message type',
-                callback_data: 'add_message_type',
+                'Add ignored message type',
+                callback_data: 'add_own_ignored_message_type',
             ),
         );
 

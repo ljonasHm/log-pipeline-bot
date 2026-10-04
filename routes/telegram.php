@@ -10,6 +10,7 @@ use App\Telegram\Conversations\AddUserIgnoredMessageTypeConversation;
 use App\Telegram\Conversations\ChangeUserRoleConversation;
 use App\Telegram\Handlers\ApiKeysCommand;
 use App\Telegram\Handlers\MessageTypesCommand;
+use App\Telegram\Handlers\OwnIgnoredMessageTypeCommand;
 use App\Telegram\Handlers\ServersCommand;
 use App\Telegram\Handlers\StartCommand;
 use App\Telegram\Handlers\TelegramUsersCommand;
@@ -53,6 +54,11 @@ $bot->onCallbackQueryData(
 $bot->onCallbackQueryData(
     'message_types:{page}',
     MessageTypesCommand::class
+);
+
+$bot->onCallbackQueryData(
+    'own_ignored_message_type:{page}',
+    OwnIgnoredMessageTypeCommand::class
 );
 
 $bot->onCallbackQueryData(
