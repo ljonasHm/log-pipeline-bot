@@ -8,12 +8,14 @@ use App\Telegram\Conversations\AddOwnIgnoredMessageTypeConversation;
 use App\Telegram\Conversations\AddServerConversation;
 use App\Telegram\Conversations\AddUserIgnoredMessageTypeConversation;
 use App\Telegram\Conversations\ChangeUserRoleConversation;
+use App\Telegram\Conversations\UserIgnoredMessageTypesConversation;
 use App\Telegram\Handlers\ApiKeysCommand;
 use App\Telegram\Handlers\MessageTypesCommand;
 use App\Telegram\Handlers\OwnIgnoredMessageTypeCommand;
 use App\Telegram\Handlers\ServersCommand;
 use App\Telegram\Handlers\StartCommand;
 use App\Telegram\Handlers\TelegramUsersCommand;
+use App\Telegram\Handlers\UserIgnoredMessageTypeCommand;
 use App\Telegram\Middleware\AdminMiddleware;
 use SergiX44\Nutgram\Nutgram;
 
@@ -82,7 +84,17 @@ $bot->onCallbackQueryData(
 );
 
 $bot->onCallbackQueryData(
-    'add_user_ignored_message_type',
+    'user_ignored_types',
+    UserIgnoredMessageTypesConversation::class
+);
+
+$bot->onCallbackQueryData(
+    'user_ignored_message_type:{userId}:{page}',
+    UserIgnoredMessageTypeCommand::class
+);
+
+$bot->onCallbackQueryData(
+    'add_user_ignored_message_type:{userId}',
     AddUserIgnoredMessageTypeConversation::class
 );
 
