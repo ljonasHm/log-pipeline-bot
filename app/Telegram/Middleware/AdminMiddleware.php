@@ -4,6 +4,7 @@ namespace App\Telegram\Middleware;
 
 use App\Models\TelegramUser;
 use App\Telegram\Conversations\AddOwnIgnoredMessageTypeConversation;
+use App\Telegram\Conversations\RemoveOwnIgnoredMessageTypeConversation;
 use Illuminate\Support\Facades\Gate;
 use SergiX44\Nutgram\Middleware\Link;
 use SergiX44\Nutgram\Nutgram;
@@ -23,7 +24,6 @@ class AdminMiddleware
         $telegramUser = $telegramId !== null
             ? TelegramUser::findByTelegramId($telegramId)
             : null;
-
 
         if ($telegramUser === null) {
             $bot->sendMessage(
@@ -52,8 +52,16 @@ class AdminMiddleware
 
     private function isOwnIgnoreList(Nutgram $bot): bool
     {
-        if ($bot->callbackQuery()?->data === 'add_own_ignored_message_type') {
-            return true;
+        $callbackData = $bot->callbackQuery()?->data;
+
+        if ($callbackData !== null) {
+            if (
+                $callbackData === 'add_own_ignored_message_type'
+                || $callbackData === 'remove_own_ignored_message_type'
+                || str_starts_with($callbackData, 'own_ignored_message_type:')
+            ) {
+                return true;
+            }
         }
 
         $conversation = $bot->currentConversation(
@@ -62,7 +70,8 @@ class AdminMiddleware
             $bot->messageThreadId(),
         );
 
-        return $conversation instanceof AddOwnIgnoredMessageTypeConversation;
+        return $conversation instanceof AddOwnIgnoredMessageTypeConversation
+            || $conversation instanceof RemoveOwnIgnoredMessageTypeConversation;
     }
 
     private function isStartCommand(Nutgram $bot): bool

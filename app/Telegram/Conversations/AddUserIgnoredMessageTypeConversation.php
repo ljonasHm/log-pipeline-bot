@@ -2,6 +2,7 @@
 
 namespace App\Telegram\Conversations;
 
+use App\Enums\IgnoredMessageTypeSource;
 use App\Models\MessageType;
 use App\Models\TelegramUser;
 use SergiX44\Nutgram\Conversations\Conversation;
@@ -70,7 +71,9 @@ class AddUserIgnoredMessageTypeConversation extends Conversation
             return;
         }
 
-        $user->ignoredMessageTypes()->syncWithoutDetaching([$messageType->id]);
+        $user->ignoredMessageTypes()->syncWithoutDetaching([
+            $messageType->id => ['source' => IgnoredMessageTypeSource::ADMIN->value],
+        ]);
 
         $bot->sendMessage(
             "Message type {$messageType->name} added to the ignore list of {$user->name}."

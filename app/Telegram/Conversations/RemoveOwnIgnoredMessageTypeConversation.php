@@ -8,7 +8,7 @@ use App\Models\TelegramUser;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
 
-class AddOwnIgnoredMessageTypeConversation extends Conversation
+class RemoveOwnIgnoredMessageTypeConversation extends Conversation
 {
     protected ?int $telegramUserId = null;
 
@@ -69,30 +69,32 @@ class AddOwnIgnoredMessageTypeConversation extends Conversation
             ->whereKey($messageType->id)
             ->first();
 
-        if ($existing !== null) {
-            $source = IgnoredMessageTypeSource::tryFrom($existing->pivot->source);
-
-            if ($user->isReceiver() && $source === IgnoredMessageTypeSource::ADMIN) {
-                $bot->sendMessage(
-                    'This message type is already added by an admin.'
-                );
-            } else {
-                $bot->sendMessage(
-                    'This message type is already in the ignore list.'
-                );
-            }
+        if ($existing === null) {
+            $bot->sendMessage(
+                'This message type is not in your ignore list.'
+            );
 
             $this->end();
 
             return;
         }
 
-        $user->ignoredMessageTypes()->syncWithoutDetaching([
-            $messageType->id => ['source' => IgnoredMessageTypeSource::USER->value],
-        ]);
+        $source = IgnoredMessageTypeSource::tryFrom($existing->pivot->source);
+
+        if ($user->isReceiver() && $source === IgnoredMessageTypeSource::ADMIN) {
+            $bot->sendMessage(
+                'This message type was added by an admin and cannot be removed.'
+            );
+
+            $this->end();
+
+            return;
+        }
+
+        $user->ignoredMessageTypes()->detach($messageType->id);
 
         $bot->sendMessage(
-            "Message type {$messageType->name} added to your ignore list."
+            "Message type {$messageType->name} removed from your ignore list."
         );
 
         $this->end();

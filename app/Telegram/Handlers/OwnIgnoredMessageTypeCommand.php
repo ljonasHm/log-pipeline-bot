@@ -2,41 +2,56 @@
 
 namespace App\Telegram\Handlers;
 
+use App\Enums\IgnoredMessageTypeSource;
+use App\Models\MessageType;
+use App\Models\TelegramUser;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-
-use App\Models\TelegramUser;
-use App\Models\MessageType;
 
 class OwnIgnoredMessageTypeCommand
 {
     private const PER_PAGE = 20;
 
-    public function __invoke(Nutgram $bot, string $page = '1'): void {
+    public function __invoke(Nutgram $bot, string $page = '1'): void
+    {
         $page = max(1, (int) $page);
         $telegramId = $bot->user()?->id;
-        $user = $telegramId !== null 
-            ? TelegramUser::findByTelegramId($telegramId) 
+        $user = $telegramId !== null
+            ? TelegramUser::findByTelegramId($telegramId)
             : null;
 
-        $ignoredMessageTypes = $user->ignoredMessageTypes()
-            ->orderBy('id')
-            ->paginate(self::PER_PAGE, page: $page);
+        if ($user === null) {
+            $bot->answerCallbackQuery(
+                text: 'User not found.',
+                show_alert: true,
+            );
+
+            return;
+        }
+
+        $query = $user->ignoredMessageTypes()->orderBy('id');
+
+        if ($user->isReceiver()) {
+            $query->wherePivot('source', IgnoredMessageTypeSource::USER->value);
+        }
+
+        $ignoredMessageTypes = $query->paginate(self::PER_PAGE, page: $page);
 
         $text = $this->buildText($ignoredMessageTypes);
         $keyboard = $this->buildKeyboard($ignoredMessageTypes);
 
         $bot->editMessageText(
             text: $text,
-            reply_markup: $keyboard
+            reply_markup: $keyboard,
         );
 
         $bot->answerCallbackQuery();
     }
 
-    private function buildText(LengthAwarePaginator $messageTypes) {
+    private function buildText(LengthAwarePaginator $messageTypes): string
+    {
         if ($messageTypes->isEmpty()) {
             return 'No ignored types.';
         }
@@ -54,7 +69,7 @@ class OwnIgnoredMessageTypeCommand
         return $list."\n\n{$shown}/{$total}";
     }
 
-    private function buildKeyboard(LengthAwarePaginator $messageTypes): InlineKeyboardMarkup 
+    private function buildKeyboard(LengthAwarePaginator $messageTypes): InlineKeyboardMarkup
     {
         $keyboard = InlineKeyboardMarkup::make();
         $page = $messageTypes->currentPage();
@@ -82,6 +97,13 @@ class OwnIgnoredMessageTypeCommand
             InlineKeyboardButton::make(
                 'Add ignored message type',
                 callback_data: 'add_own_ignored_message_type',
+            ),
+        );
+
+        $keyboard->addRow(
+            InlineKeyboardButton::make(
+                'Remove ignored message type',
+                callback_data: 'remove_own_ignored_message_type',
             ),
         );
 

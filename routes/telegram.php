@@ -8,6 +8,8 @@ use App\Telegram\Conversations\AddOwnIgnoredMessageTypeConversation;
 use App\Telegram\Conversations\AddServerConversation;
 use App\Telegram\Conversations\AddUserIgnoredMessageTypeConversation;
 use App\Telegram\Conversations\ChangeUserRoleConversation;
+use App\Telegram\Conversations\RemoveOwnIgnoredMessageTypeConversation;
+use App\Telegram\Conversations\RemoveUserIgnoredMessageTypeConversation;
 use App\Telegram\Conversations\UserIgnoredMessageTypesConversation;
 use App\Telegram\Handlers\ApiKeysCommand;
 use App\Telegram\Handlers\MessageTypesCommand;
@@ -101,4 +103,14 @@ $bot->onCallbackQueryData(
 $bot->onCallbackQueryData(
     'add_own_ignored_message_type',
     AddOwnIgnoredMessageTypeConversation::class
+);
+
+$bot->onCallbackQueryData(
+    'remove_own_ignored_message_type',
+    RemoveOwnIgnoredMessageTypeConversation::class
+);
+
+$bot->onCallbackQueryData(
+    'remove_user_ignored_message_type:{userId}',
+    RemoveUserIgnoredMessageTypeConversation::class
 );

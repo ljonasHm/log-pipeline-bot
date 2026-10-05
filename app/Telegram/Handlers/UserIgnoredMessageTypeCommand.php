@@ -64,7 +64,11 @@ class UserIgnoredMessageTypeCommand
 
         $list = collect($messageTypes->items())
             ->values()
-            ->map(fn (MessageType $messageType, int $index) => ($firstItem + $index).'. '.$messageType->name)
+            ->map(function (MessageType $messageType, int $index) use ($firstItem): string {
+                $source = $messageType->pivot->source;
+
+                return ($firstItem + $index).'. '.$messageType->name.' — '.$source;
+            })
             ->implode("\n");
 
         $shown = $messageTypes->lastItem() ?? 0;
@@ -101,6 +105,13 @@ class UserIgnoredMessageTypeCommand
             InlineKeyboardButton::make(
                 'Add ignored message type',
                 callback_data: 'add_user_ignored_message_type:'.$userId,
+            ),
+        );
+
+        $keyboard->addRow(
+            InlineKeyboardButton::make(
+                'Remove ignored message type',
+                callback_data: 'remove_user_ignored_message_type:'.$userId,
             ),
         );
 
