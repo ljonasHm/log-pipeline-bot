@@ -2,23 +2,18 @@
 
 namespace App\Telegram\Conversations;
 
-use App\Enums\IgnoredMessageTypeSource;
 use App\Models\MessageType;
 use App\Models\TelegramUser;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
 
-class AddOwnIgnoredMessageTypeConversation extends Conversation
+class RemoveUserIgnoredMessageTypeConversation extends Conversation
 {
     protected ?int $telegramUserId = null;
 
-    public function start(Nutgram $bot): void
+    public function start(Nutgram $bot, string $userId): void
     {
-        $telegramId = $bot->user()?->id;
-
-        $user = $telegramId !== null
-            ? TelegramUser::findByTelegramId($telegramId)
-            : null;
+        $user = TelegramUser::query()->find((int) $userId);
 
         if ($user === null) {
             $bot->sendMessage(
@@ -65,34 +60,20 @@ class AddOwnIgnoredMessageTypeConversation extends Conversation
             return;
         }
 
-        $existing = $user->ignoredMessageTypes()
-            ->whereKey($messageType->id)
-            ->first();
-
-        if ($existing !== null) {
-            $source = IgnoredMessageTypeSource::tryFrom($existing->pivot->source);
-
-            if ($user->isReceiver() && $source === IgnoredMessageTypeSource::ADMIN) {
-                $bot->sendMessage(
-                    'This message type is already added by an admin.'
-                );
-            } else {
-                $bot->sendMessage(
-                    'This message type is already in the ignore list.'
-                );
-            }
+        if (! $user->ignoredMessageTypes()->whereKey($messageType->id)->exists()) {
+            $bot->sendMessage(
+                'This message type is not in the ignore list.'
+            );
 
             $this->end();
 
             return;
         }
 
-        $user->ignoredMessageTypes()->syncWithoutDetaching([
-            $messageType->id => ['source' => IgnoredMessageTypeSource::USER->value],
-        ]);
+        $user->ignoredMessageTypes()->detach($messageType->id);
 
         $bot->sendMessage(
-            "Message type {$messageType->name} added to your ignore list."
+            "Message type {$messageType->name} removed from the ignore list of {$user->name}."
         );
 
         $this->end();

@@ -26,7 +26,8 @@ class MessageType extends Model
 
     public function telegramUsers(): BelongsToMany
     {
-        return $this->belongsToMany(TelegramUser::class);
+        return $this->belongsToMany(TelegramUser::class)
+            ->withPivot('source');
     }
 
     public function scopeWithName(Builder $query, string $name): void

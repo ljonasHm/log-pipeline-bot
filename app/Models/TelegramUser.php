@@ -44,6 +44,7 @@ class TelegramUser extends Model
 
     public function ignoredMessageTypes(): BelongsToMany
     {
-        return $this->belongsToMany(MessageType::class);
+        return $this->belongsToMany(MessageType::class)
+            ->withPivot('source');
     }
 }
