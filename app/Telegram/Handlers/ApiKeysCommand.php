@@ -42,7 +42,7 @@ class ApiKeysCommand
 
         $list = collect($apiKeys->items())
             ->values()
-            ->map(fn (ApiKey $apiKey, int $index) => ($firstItem + $index).'. '.$apiKey->name.' — '.$apiKey->server->name)
+            ->map(fn (ApiKey $apiKey, int $index) => ($firstItem + $index).'. '.$apiKey->name.' — '.$apiKey->server->name.' — '.$apiKey->identifier)
             ->implode("\n");
 
         $shown = $apiKeys->lastItem() ?? 0;
@@ -79,6 +79,13 @@ class ApiKeysCommand
             InlineKeyboardButton::make(
                 'Add API key',
                 callback_data: 'add_api_key',
+            ),
+        );
+
+        $keyboard->addRow(
+            InlineKeyboardButton::make(
+                'Remove API key',
+                callback_data: 'remove_api_key',
             ),
         );
 

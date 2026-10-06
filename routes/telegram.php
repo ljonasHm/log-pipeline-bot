@@ -8,6 +8,7 @@ use App\Telegram\Conversations\AddOwnIgnoredMessageTypeConversation;
 use App\Telegram\Conversations\AddServerConversation;
 use App\Telegram\Conversations\AddUserIgnoredMessageTypeConversation;
 use App\Telegram\Conversations\ChangeUserRoleConversation;
+use App\Telegram\Conversations\RemoveApiKeyConversation;
 use App\Telegram\Conversations\RemoveOwnIgnoredMessageTypeConversation;
 use App\Telegram\Conversations\RemoveUserIgnoredMessageTypeConversation;
 use App\Telegram\Conversations\UserIgnoredMessageTypesConversation;
@@ -78,6 +79,11 @@ $bot->onCallbackQueryData(
 $bot->onCallbackQueryData(
     'add_api_key',
     AddApiKeyConversation::class
+);
+
+$bot->onCallbackQueryData(
+    'remove_api_key',
+    RemoveApiKeyConversation::class
 );
 
 $bot->onCallbackQueryData(
