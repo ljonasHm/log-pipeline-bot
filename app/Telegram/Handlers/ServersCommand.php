@@ -83,6 +83,13 @@ class ServersCommand
 
         $keyboard->addRow(
             InlineKeyboardButton::make(
+                'Remove server',
+                callback_data: 'remove_server',
+            ),
+        );
+
+        $keyboard->addRow(
+            InlineKeyboardButton::make(
                 'Back',
                 callback_data: 'start',
             ),
