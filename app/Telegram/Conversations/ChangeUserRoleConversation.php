@@ -42,6 +42,16 @@ class ChangeUserRoleConversation extends Conversation
             return;
         }
 
+        if ($user->isPermanentAdmin()) {
+            $bot->sendMessage(
+                'This user\'s role cannot be changed.'
+            );
+
+            $this->end();
+
+            return;
+        }
+
         $this->telegramUserId = $user->id;
 
         $bot->sendMessage(
@@ -93,6 +103,17 @@ class ChangeUserRoleConversation extends Conversation
             $bot->answerCallbackQuery(
                 text: 'User not found.',
                 show_alert: true
+            );
+
+            $this->end();
+
+            return;
+        }
+
+        if ($user->isPermanentAdmin()) {
+            $bot->answerCallbackQuery(
+                text: 'This user\'s role cannot be changed.',
+                show_alert: true,
             );
 
             $this->end();

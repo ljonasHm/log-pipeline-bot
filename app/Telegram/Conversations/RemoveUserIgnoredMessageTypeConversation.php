@@ -25,6 +25,16 @@ class RemoveUserIgnoredMessageTypeConversation extends Conversation
             return;
         }
 
+        if ($user->isPermanentAdmin()) {
+            $bot->sendMessage(
+                'This user\'s ignore list cannot be changed.'
+            );
+
+            $this->end();
+
+            return;
+        }
+
         $this->telegramUserId = $user->id;
 
         $bot->sendMessage(
@@ -53,6 +63,16 @@ class RemoveUserIgnoredMessageTypeConversation extends Conversation
         if ($user === null) {
             $bot->sendMessage(
                 'User not found.'
+            );
+
+            $this->end();
+
+            return;
+        }
+
+        if ($user->isPermanentAdmin()) {
+            $bot->sendMessage(
+                'This user\'s ignore list cannot be changed.'
             );
 
             $this->end();

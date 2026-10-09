@@ -2,6 +2,7 @@
 
 namespace App\Telegram\Handlers;
 
+use App\Enums\UserRole;
 use App\Models\TelegramUser;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use SergiX44\Nutgram\Nutgram;
@@ -49,7 +50,11 @@ class TelegramUsersCommand
 
         $list = collect($users->items())
             ->values()
-            ->map(fn (TelegramUser $user, int $index) => ($firstItem + $index).'. '.$user->name.' — '.$user->role->value.' '.$user->chat_id)
+            ->map(function (TelegramUser $user, int $index) use ($firstItem): string {
+                $role = $user->isAdmin() ? UserRole::ADMIN->value : $user->role->value;
+
+                return ($firstItem + $index).'. '.$user->name.' — '.$role.' '.$user->chat_id;
+            })
             ->implode("\n");
 
         $shown = $users->lastItem() ?? 0;

@@ -50,7 +50,7 @@ class UserIgnoredMessageTypeCommand
 
         return [
             $this->buildText($ignoredMessageTypes),
-            $this->buildKeyboard($user->id, $ignoredMessageTypes),
+            $this->buildKeyboard($user, $ignoredMessageTypes),
         ];
     }
 
@@ -77,9 +77,10 @@ class UserIgnoredMessageTypeCommand
         return $list."\n\n{$shown}/{$total}";
     }
 
-    private function buildKeyboard(int $userId, LengthAwarePaginator $messageTypes): InlineKeyboardMarkup
+    private function buildKeyboard(TelegramUser $user, LengthAwarePaginator $messageTypes): InlineKeyboardMarkup
     {
         $keyboard = InlineKeyboardMarkup::make();
+        $userId = $user->id;
         $page = $messageTypes->currentPage();
         $navButtons = [];
 
@@ -101,19 +102,21 @@ class UserIgnoredMessageTypeCommand
             $keyboard->addRow(...$navButtons);
         }
 
-        $keyboard->addRow(
-            InlineKeyboardButton::make(
-                'Add ignored message type',
-                callback_data: 'add_user_ignored_message_type:'.$userId,
-            ),
-        );
+        if (! $user->isPermanentAdmin()) {
+            $keyboard->addRow(
+                InlineKeyboardButton::make(
+                    'Add ignored message type',
+                    callback_data: 'add_user_ignored_message_type:'.$userId,
+                ),
+            );
 
-        $keyboard->addRow(
-            InlineKeyboardButton::make(
-                'Remove ignored message type',
-                callback_data: 'remove_user_ignored_message_type:'.$userId,
-            ),
-        );
+            $keyboard->addRow(
+                InlineKeyboardButton::make(
+                    'Remove ignored message type',
+                    callback_data: 'remove_user_ignored_message_type:'.$userId,
+                ),
+            );
+        }
 
         $keyboard->addRow(
             InlineKeyboardButton::make(

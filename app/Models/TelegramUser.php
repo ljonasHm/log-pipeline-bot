@@ -32,13 +32,28 @@ class TelegramUser extends Model
         return static::where('telegram_id', $telegramId)->first();
     }
 
+    public function isPermanentAdmin(): bool
+    {
+        $chatIds = config('telegram.permanent_admin_chat_ids', []);
+
+        return in_array((int) $this->chat_id, $chatIds, true);
+    }
+
     public function isAdmin(): bool
     {
+        if ($this->isPermanentAdmin()) {
+            return true;
+        }
+
         return $this->role === UserRole::ADMIN;
     }
 
     public function isReceiver(): bool
     {
+        if ($this->isPermanentAdmin()) {
+            return false;
+        }
+
         return $this->role === UserRole::RECEIVER;
     }
 

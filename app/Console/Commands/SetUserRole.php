@@ -2,11 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Attributes\Description;
-use Illuminate\Console\Attributes\Signature;
-use Illuminate\Console\Command;
 use App\Enums\UserRole;
 use App\Models\TelegramUser;
+use Illuminate\Console\Command;
 
 class SetUserRole extends Command
 {
@@ -21,12 +19,12 @@ class SetUserRole extends Command
     public function handle()
     {
         $role = UserRole::tryFrom($this->argument('role'));
-        
+
         if ($role === null) {
             $this->error('Invalid role.');
 
             $this->line(
-                'Available roles: ' .
+                'Available roles: '.
                 implode(', ', array_column(UserRole::cases(), 'value'))
             );
 
@@ -36,9 +34,8 @@ class SetUserRole extends Command
         $identifiers = [
             'id' => $this->option('id'),
             'telegram_id' => $this->option('telegram-id'),
-            'chat_id' => $this->option('chat-id')
+            'chat_id' => $this->option('chat-id'),
         ];
-
 
         $identifiers = array_filter(
             $identifiers,
@@ -60,6 +57,12 @@ class SetUserRole extends Command
 
         if ($user === null) {
             $this->error('User not found.');
+
+            return self::FAILURE;
+        }
+
+        if ($user->isPermanentAdmin()) {
+            $this->error('This user\'s role cannot be changed.');
 
             return self::FAILURE;
         }

@@ -27,7 +27,13 @@ class StartCommand
 
         $keyboard = InlineKeyboardMarkup::make();
 
-        if ($user->role === UserRole::ADMIN) {
+        $role = match (true) {
+            $user->isAdmin() => UserRole::ADMIN,
+            $user->isReceiver() => UserRole::RECEIVER,
+            default => UserRole::NONE,
+        };
+
+        if ($user->isAdmin()) {
             $keyboard->addRow(
                 InlineKeyboardButton::make(
                     'Telegram users',
@@ -59,7 +65,7 @@ class StartCommand
             );
         }
 
-        $text = $this->buildWelcomeText($user->name, $user->role);
+        $text = $this->buildWelcomeText($user->name, $role);
 
         if ($bot->isCallbackQuery()) {
             $bot->editMessageText(
