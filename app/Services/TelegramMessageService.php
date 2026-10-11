@@ -18,8 +18,9 @@ class TelegramMessageService
     ): void {
 
         $typeLabel = $message->messageType?->title ?? $message->type;
+        $serverName = $message->server->name;
 
-        $text = "Тип: {$typeLabel}\n\n{$message->text}";
+        $text = "{$serverName}: {$typeLabel}\n\n{$message->text}";
 
         $this->bot->sendMessage(
             text: $text,
