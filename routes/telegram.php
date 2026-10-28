@@ -3,21 +3,29 @@
 /** @var Nutgram $bot */
 
 use App\Telegram\Conversations\AddApiKeyConversation;
+use App\Telegram\Conversations\AddGroupIgnoredMessageTypeConversation;
 use App\Telegram\Conversations\AddMessageTypeConversation;
 use App\Telegram\Conversations\AddOwnIgnoredMessageTypeConversation;
 use App\Telegram\Conversations\AddServerConversation;
 use App\Telegram\Conversations\AddUserIgnoredMessageTypeConversation;
+use App\Telegram\Conversations\ChangeGroupRoleConversation;
 use App\Telegram\Conversations\ChangeUserRoleConversation;
+use App\Telegram\Conversations\GroupIgnoredMessageTypesConversation;
 use App\Telegram\Conversations\RemoveApiKeyConversation;
+use App\Telegram\Conversations\RemoveGroupIgnoredMessageTypeConversation;
 use App\Telegram\Conversations\RemoveOwnIgnoredMessageTypeConversation;
 use App\Telegram\Conversations\RemoveServerConversation;
 use App\Telegram\Conversations\RemoveUserIgnoredMessageTypeConversation;
 use App\Telegram\Conversations\UserIgnoredMessageTypesConversation;
 use App\Telegram\Handlers\ApiKeysCommand;
+use App\Telegram\Handlers\GroupIgnoredMessageTypeCommand;
 use App\Telegram\Handlers\MessageTypesCommand;
+use App\Telegram\Handlers\MigrateTelegramGroupHandler;
 use App\Telegram\Handlers\OwnIgnoredMessageTypeCommand;
 use App\Telegram\Handlers\ServersCommand;
 use App\Telegram\Handlers\StartCommand;
+use App\Telegram\Handlers\SyncTelegramGroupHandler;
+use App\Telegram\Handlers\TelegramGroupsCommand;
 use App\Telegram\Handlers\TelegramUsersCommand;
 use App\Telegram\Handlers\UserIgnoredMessageTypeCommand;
 use App\Telegram\Middleware\AdminMiddleware;
@@ -34,6 +42,10 @@ use SergiX44\Nutgram\Nutgram;
 */
 
 $bot->middleware(AdminMiddleware::class);
+
+$bot->onMyChatMember(SyncTelegramGroupHandler::class);
+
+$bot->onMigrateToChatId(MigrateTelegramGroupHandler::class);
 
 $bot->onCommand('start', StartCommand::class);
 
@@ -125,4 +137,34 @@ $bot->onCallbackQueryData(
 $bot->onCallbackQueryData(
     'remove_user_ignored_message_type:{userId}',
     RemoveUserIgnoredMessageTypeConversation::class
+);
+
+$bot->onCallbackQueryData(
+    'telegram_groups:{page}',
+    TelegramGroupsCommand::class
+);
+
+$bot->onCallbackQueryData(
+    'change_group_role',
+    ChangeGroupRoleConversation::class
+);
+
+$bot->onCallbackQueryData(
+    'group_ignored_types',
+    GroupIgnoredMessageTypesConversation::class
+);
+
+$bot->onCallbackQueryData(
+    'group_ignored_message_type:{groupId}:{page}',
+    GroupIgnoredMessageTypeCommand::class
+);
+
+$bot->onCallbackQueryData(
+    'add_group_ignored_message_type:{groupId}',
+    AddGroupIgnoredMessageTypeConversation::class
+);
+
+$bot->onCallbackQueryData(
+    'remove_group_ignored_message_type:{groupId}',
+    RemoveGroupIgnoredMessageTypeConversation::class
 );

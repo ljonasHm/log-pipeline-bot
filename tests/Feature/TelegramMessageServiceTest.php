@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Message;
 use App\Models\MessageType;
 use App\Models\Server;
+use App\Models\TelegramGroup;
 use App\Models\TelegramUser;
 use App\Services\TelegramMessageService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -68,5 +69,32 @@ class TelegramMessageServiceTest extends TestCase
         });
 
         app(TelegramMessageService::class)->sendToUser($user, $message);
+    }
+
+    public function test_sends_the_same_text_to_a_group_chat(): void
+    {
+        $server = Server::factory()->create([
+            'name' => 'web',
+        ]);
+        $group = TelegramGroup::factory()->receiver()->create([
+            'chat_id' => -100123,
+        ]);
+        $message = Message::factory()->create([
+            'type' => 'custom',
+            'text' => 'Hello',
+            'message_type_id' => null,
+            'server_id' => $server->id,
+        ]);
+
+        $this->mock(Nutgram::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('sendMessage')
+                ->once()
+                ->withArgs(function (string $text, int|string|null $chatId): bool {
+                    return $text === "web: custom\n\nHello"
+                        && $chatId === -100123;
+                });
+        });
+
+        app(TelegramMessageService::class)->sendToGroup($group, $message);
     }
 }

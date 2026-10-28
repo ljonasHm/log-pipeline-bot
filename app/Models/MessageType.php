@@ -30,6 +30,11 @@ class MessageType extends Model
             ->withPivot('source');
     }
 
+    public function telegramGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(TelegramGroup::class);
+    }
+
     public function scopeWithName(Builder $query, string $name): void
     {
         $query->whereRaw('lower(name) = ?', [strtolower(trim($name))]);

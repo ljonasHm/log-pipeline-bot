@@ -8,11 +8,22 @@ use App\Telegram\Conversations\RemoveOwnIgnoredMessageTypeConversation;
 use Illuminate\Support\Facades\Gate;
 use SergiX44\Nutgram\Middleware\Link;
 use SergiX44\Nutgram\Nutgram;
+use SergiX44\Nutgram\Telegram\Properties\ChatType;
 
 class AdminMiddleware
 {
     public function __invoke(Nutgram $bot, Link $next): void
     {
+        if ($this->isGroupSyncUpdate($bot)) {
+            $next($bot);
+
+            return;
+        }
+
+        if ($this->isNonPrivateChat($bot)) {
+            return;
+        }
+
         if ($this->isStartCommand($bot)) {
             $next($bot);
 
@@ -48,6 +59,48 @@ class AdminMiddleware
         }
 
         $next($bot);
+    }
+
+    private function isGroupSyncUpdate(Nutgram $bot): bool
+    {
+        if (! $this->isGroupOrSupergroup($bot)) {
+            return false;
+        }
+
+        if ($bot->isMyChatMember()) {
+            return true;
+        }
+
+        return $bot->message()?->migrate_to_chat_id !== null;
+    }
+
+    private function isNonPrivateChat(Nutgram $bot): bool
+    {
+        $type = $this->chatType($bot);
+
+        return $type !== null && $type !== ChatType::PRIVATE;
+    }
+
+    private function isGroupOrSupergroup(Nutgram $bot): bool
+    {
+        $type = $this->chatType($bot);
+
+        return $type === ChatType::GROUP || $type === ChatType::SUPERGROUP;
+    }
+
+    private function chatType(Nutgram $bot): ?ChatType
+    {
+        $type = $bot->chat()?->type;
+
+        if ($type instanceof ChatType) {
+            return $type;
+        }
+
+        if (! is_string($type)) {
+            return null;
+        }
+
+        return ChatType::tryFrom($type);
     }
 
     private function isOwnIgnoreList(Nutgram $bot): bool
