@@ -54,6 +54,12 @@ class StartCommand
                     callback_data: 'message_types:1'
                 ),
             );
+            $keyboard->addRow(
+                InlineKeyboardButton::make(
+                    'Groups',
+                    callback_data: 'telegram_groups:1',
+                ),
+            );
         }
 
         if ($user->isAdmin() || $user->isReceiver()) {
